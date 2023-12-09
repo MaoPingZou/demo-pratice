@@ -1,6 +1,7 @@
 package com.example.mongodbdemo;
 
 import com.example.mongodbdemo.model.GroceryItem;
+import com.example.mongodbdemo.repository.CustomItemRepository;
 import com.example.mongodbdemo.repository.GroceryItemRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -20,6 +21,9 @@ public class MongodbDemoApplication implements CommandLineRunner {
     @Autowired
     private GroceryItemRepository groceryItemRepo;
 
+    @Autowired
+    private CustomItemRepository customItemRepository;
+
     public static void main(String[] args) {
         SpringApplication.run(MongodbDemoApplication.class, args);
     }
@@ -27,7 +31,9 @@ public class MongodbDemoApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
-        System.out.println("-----创建 GROCERY ITEMS-----\n");
+        System.out.println("\n============> 使用 MongoRepository 实现简单的 CURD 功能 Start <============");
+
+        System.out.println("\n-----创建 GROCERY ITEMS-----\n");
 
         createGroceryItems();
 
@@ -55,11 +61,25 @@ public class MongodbDemoApplication implements CommandLineRunner {
 
         findCountOfGroceryItems();
 
-        System.out.println("\n-----结束-----");
+        System.out.println("\n============> 使用 MongoRepository 实现简单的 CURD 功能 End <============");
 
+
+        System.out.println("\n\n============> 使用 MongoTemplate 做 update 开始 <============");
+
+        System.out.println("\n-----根据 name 更新 数量-----");
+
+        GroceryItem beforeUpdateItem = findGroceryItemByName("Bonny Cheese Crackers Plain");
+        System.out.println("\n更新前的数量：" + beforeUpdateItem.getQuantity());
+
+        updateItemQuantity("Bonny Cheese Crackers Plain", 10);
+
+        GroceryItem afterUpdateItem = findGroceryItemByName("Bonny Cheese Crackers Plain");
+        System.out.println("\n更新后的数量：" + afterUpdateItem.getQuantity());
+
+        System.out.println("\n============> 使用 MongoTemplate 做 update 结束 <============");
     }
 
-    /*=====================================================*/
+    /*===================使用 MongoRepository=================*/
 
     //CREATE
     void createGroceryItems() {
@@ -83,12 +103,19 @@ public class MongodbDemoApplication implements CommandLineRunner {
     }
 
     /**
-     * 通过 name 获取所有 item
+     * 通过 name 获取 item
      */
     public void getGroceryItemByName(String name) {
-        System.out.println("通过 name 获取所有 item: " + name);
+        System.out.println("通过 name 获取 item: " + name);
         GroceryItem item = groceryItemRepo.findItemByName(name);
         System.out.println(getItemDetails(item));
+    }
+
+    /**
+     * 通过 name 获取 item 并返回
+     */
+    public GroceryItem findGroceryItemByName(String name) {
+        return groceryItemRepo.findItemByName(name);
     }
 
     /**
@@ -149,5 +176,14 @@ public class MongodbDemoApplication implements CommandLineRunner {
         System.out.println("Id 为： " + id + " 的 Item 被删除......");
     }
 
-    /*=====================================================*/
+    /*===================使用 MongoRepository=================*/
+
+    /*===================使用 MongoTemplate=================*/
+
+    // UPDATE
+    public void updateItemQuantity(String name, float newQuantity) {
+        customItemRepository.updateItemQuantity(name, newQuantity);
+    }
+
+    /*===================使用 MongoTemplate=================*/
 }
